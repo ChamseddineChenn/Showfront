@@ -6,7 +6,7 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Golden Moment Events',
+  title: 'Showfront Events',
   description: 'Book tickets to exclusive events in Tunisia',
 };
 

@@ -1,6 +1,6 @@
-# Golden Moment
+# Showfront
 
-**Golden Moment** is an online event-ticketing platform designed to let people discover events, choose ticket options, and book their place online. It combines a Next.js web application with a separately deployed NestJS API and a MongoDB data layer.
+**Showfront** is an online event-ticketing platform designed to let people discover events, choose ticket options, and book their place online. It combines a Next.js web application with a separately deployed NestJS API and a MongoDB data layer.
 
 The project brings together event discovery, account management, ticket inventory, checkout, payment integration, digital ticket delivery, QR-based validation, and administrative tools.
 
@@ -27,7 +27,7 @@ The frontend communicates with the API through the configured API origin. MongoD
 ## Repository layout
 
 ```
-Golden_Moment/
+Showfront/
 ├── ticketing-platform/   # Next.js web application
 └── ticketing-backend/    # NestJS API and deployment configuration
 ```

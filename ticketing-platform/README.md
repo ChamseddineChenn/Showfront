@@ -1,6 +1,6 @@
-# Golden Moment Web Application
+# Showfront Web Application
 
-The web frontend for **Golden Moment**, an online event-ticketing platform. It gives visitors a place to discover events, explore ticket options, select seats where supported, and complete a ticket-purchase flow. Account holders can manage their sessions and tickets, while authorized administrators manage platform content and operations.
+The web frontend for **Showfront**, an online event-ticketing platform. It gives visitors a place to discover events, explore ticket options, select seats where supported, and complete a ticket-purchase flow. Account holders can manage their sessions and tickets, while authorized administrators manage platform content and operations.
 
 Built with **Next.js 16, React 19, TypeScript, and Tailwind CSS 4**.
 
@@ -33,7 +33,7 @@ Some capabilities depend on the backend, database records, and provider configur
 
 - Node.js 20 or newer
 - npm
-- A running Golden Moment API instance
+- A running Showfront API instance
 
 ## Local setup
 

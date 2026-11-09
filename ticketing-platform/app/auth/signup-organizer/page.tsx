@@ -114,7 +114,7 @@ export default function SignupOrganizerPage() {
                 </div>
                 <div>
                   <h1 className="text-base sm:text-xl font-bold text-stone-900 tracking-tight">
-                    Golden Moment
+                    Showfront
                   </h1>
                   <p className="text-xs text-stone-500 -mt-0.5 hidden sm:block">
                     Events & Experiences
@@ -165,7 +165,7 @@ export default function SignupOrganizerPage() {
               </div>
               <div>
                 <h1 className="text-base sm:text-xl font-bold text-stone-900 tracking-tight">
-                  Golden Moment
+                  Showfront
                 </h1>
                 <p className="text-xs text-stone-500 -mt-0.5 hidden sm:block">
                   Events & Experiences
@@ -229,7 +229,7 @@ export default function SignupOrganizerPage() {
                   Become an Organizer
                 </h2>
                 <p className="text-stone-300 text-sm sm:text-base">
-                  Create and manage your events on Golden Moment
+                  Create and manage your events on Showfront
                 </p>
               </div>
             </div>

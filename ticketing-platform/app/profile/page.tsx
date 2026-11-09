@@ -109,7 +109,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <h1 className="text-base sm:text-xl font-bold text-stone-900 tracking-tight">
-                    Golden Moment
+                    Showfront
                   </h1>
                   <p className="text-xs text-stone-500 -mt-0.5 hidden sm:block">
                     Events & Experiences
@@ -171,7 +171,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <h1 className="text-base sm:text-xl font-bold text-stone-900 tracking-tight">
-                  Golden Moment
+                  Showfront
                 </h1>
                 <p className="text-xs text-stone-500 -mt-0.5 hidden sm:block">
                   Events & Experiences

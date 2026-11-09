@@ -5,7 +5,7 @@ export function Hero() {
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: "url('/images/Golden_Event_Banner.png')",
+          backgroundImage: "url('/images/Showfront_Event_Banner.png')",
         }}
       ></div>
 

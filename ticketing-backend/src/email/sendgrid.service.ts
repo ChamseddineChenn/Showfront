@@ -55,7 +55,7 @@ export class SendGridService {
 
   /**
    * Generate PDF from structured ticket data using PDFKit
-   * Clean, elegant design with Golden Moment brand colors (amber/gold)
+   * Clean, elegant design with Showfront brand colors (amber/gold)
    * Returns Buffer or null if generation fails
    */
   async generatePdfFromData(ticketData: {
@@ -85,7 +85,7 @@ export class SendGridService {
       const marginRight = 50;
       const contentWidth = pageWidth - marginLeft - marginRight;
 
-      // ======== BRAND COLORS (Golden Moment - Amber/Stone palette) ========
+      // ======== BRAND COLORS (Showfront - Amber/Stone palette) ========
       const colors = {
         amber600: '#d97706', // Primary brand color
         amber700: '#b45309', // Darker amber
@@ -414,7 +414,7 @@ export class SendGridService {
             .fontSize(9)
             .fillColor(colors.stone400)
             .text(
-              'Questions? Contact support@goldenmoment.com',
+              'Questions? Contact support@showfront.events',
               marginLeft,
               page2Pos,
               { width: contentWidth, align: 'center' },
@@ -425,7 +425,7 @@ export class SendGridService {
             .fontSize(8)
             .fillColor(colors.stone400)
             .text(
-              '© Golden Moment Events. All rights reserved.',
+              '© Showfront Events. All rights reserved.',
               marginLeft,
               page2Pos,
               { width: contentWidth, align: 'center' },
@@ -572,7 +572,7 @@ export class SendGridService {
         .fillColor(107, 114, 128)
         .fontSize(9)
         .font('Helvetica')
-        .text('Golden Moment Events', { align: 'center' })
+        .text('Showfront Events', { align: 'center' })
         .text('Thank you for your purchase!', { align: 'center' })
         .moveDown(0.3)
         .fontSize(8)
@@ -648,8 +648,8 @@ export class SendGridService {
 
       const msg = {
         to: email,
-        from: `${process.env.SENDGRID_FROM_NAME || 'Golden Moment'} <${process.env.SENDGRID_FROM_EMAIL}>`,
-        subject: '✨ Verify Your Golden Moment Account',
+        from: `${process.env.SENDGRID_FROM_NAME || 'Showfront'} <${process.env.SENDGRID_FROM_EMAIL}>`,
+        subject: '✨ Verify Your Showfront Account',
         html: `
           <!DOCTYPE html>
           <html>
@@ -666,7 +666,7 @@ export class SendGridService {
           <body>
             <div class="container">
               <div class="header">
-                <h1>🎉 Welcome to Golden Moment!</h1>
+                <h1>🎉 Welcome to Showfront!</h1>
               </div>
               <div class="content">
                 <p>Hi there,</p>
@@ -678,10 +678,10 @@ export class SendGridService {
                 <p>Or copy and paste this link into your browser:</p>
                 <p style="word-break: break-all; color: #f59e0b;">${verificationUrl}</p>
                 <p><strong>This link will expire in 24 hours.</strong></p>
-                <p>If you didn't create an account with Golden Moment, please ignore this email.</p>
+                <p>If you didn't create an account with Showfront, please ignore this email.</p>
               </div>
               <div class="footer">
-                <p>Golden Moment Events © 2026</p>
+                <p>Showfront Events © 2026</p>
                 <p>Tunis, Tunisia</p>
               </div>
             </div>
@@ -841,7 +841,7 @@ export class SendGridService {
 
       const msg = {
         to: email,
-        from: `${process.env.SENDGRID_FROM_NAME || 'Golden Moment'} <${process.env.SENDGRID_FROM_EMAIL}>`,
+        from: `${process.env.SENDGRID_FROM_NAME || 'Showfront'} <${process.env.SENDGRID_FROM_EMAIL}>`,
         subject: `Your Ticket Receipt - ${eventName}`,
         html: htmlContent,
         attachments,
@@ -894,8 +894,8 @@ export class SendGridService {
 
       const msg = {
         to: email,
-        from: `${process.env.SENDGRID_FROM_NAME || 'Golden Moment'} <${process.env.SENDGRID_FROM_EMAIL}>`,
-        subject: '🔐 Reset Your Golden Moment Password',
+        from: `${process.env.SENDGRID_FROM_NAME || 'Showfront'} <${process.env.SENDGRID_FROM_EMAIL}>`,
+        subject: '🔐 Reset Your Showfront Password',
         html: `
           <!DOCTYPE html>
           <html>
@@ -917,7 +917,7 @@ export class SendGridService {
               </div>
               <div class="content">
                 <p>Hello,</p>
-                <p>We received a request to reset your password for your Golden Moment account.</p>
+                <p>We received a request to reset your password for your Showfront account.</p>
                 <p>Click the button below to reset your password:</p>
                 <div style="text-align: center;">
                   <a href="${resetUrl}" class="button">Reset Password</a>
@@ -931,7 +931,7 @@ export class SendGridService {
                 <p>For security reasons, we recommend using a strong password that includes uppercase and lowercase letters, numbers, and special characters.</p>
               </div>
               <div class="footer">
-                <p>Golden Moment Events © 2026</p>
+                <p>Showfront Events © 2026</p>
                 <p>Tunis, Tunisia</p>
               </div>
             </div>
@@ -985,7 +985,7 @@ export class SendGridService {
     try {
       const msg = {
         to: email,
-        from: `${process.env.SENDGRID_FROM_NAME || 'Golden Moment'} <${process.env.SENDGRID_FROM_EMAIL}>`,
+        from: `${process.env.SENDGRID_FROM_NAME || 'Showfront'} <${process.env.SENDGRID_FROM_EMAIL}>`,
         subject: '✅ Password Changed Successfully',
         html: `
           <!DOCTYPE html>
@@ -1014,12 +1014,12 @@ export class SendGridService {
                 </div>
                 <p>You can now log in with your new password:</p>
                 <div style="text-align: center;">
-                  <a href="${process.env.FRONTEND_URL || 'https://golden-moment.tn'}/auth/login" class="button">Log In to Your Account</a>
+                  <a href="${process.env.FRONTEND_URL || 'https://www.showfront.events'}/auth/login" class="button">Log In to Your Account</a>
                 </div>
                 <p>If you did not make this change or have any concerns about your account security, please contact our support team immediately.</p>
               </div>
               <div class="footer">
-                <p>Golden Moment Events © 2026</p>
+                <p>Showfront Events © 2026</p>
                 <p>Tunis, Tunisia</p>
               </div>
             </div>

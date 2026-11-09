@@ -461,11 +461,11 @@ export default function CategoryPage() {
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20">
-                <span className="text-white text-lg font-bold">G</span>
+                <span className="text-white text-lg font-bold">S</span>
               </div>
               <div>
                 <h1 className="text-xl font-bold text-stone-900 tracking-tight">
-                  Golden Moment
+                  Showfront
                 </h1>
                 <p className="text-xs text-stone-500 -mt-0.5">
                   Events & Experiences
@@ -654,10 +654,10 @@ export default function CategoryPage() {
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center">
-                  <span className="text-white text-lg font-bold">G</span>
+                  <span className="text-white text-lg font-bold">S</span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold">Golden Moment</h3>
+                  <h3 className="text-xl font-bold">Showfront</h3>
                   <p className="text-xs text-stone-400">Events & Experiences</p>
                 </div>
               </div>
@@ -698,7 +698,7 @@ export default function CategoryPage() {
             <div>
               <h4 className="font-bold text-lg mb-4">Contact</h4>
               <ul className="space-y-3 text-stone-400">
-                <li>support@goldenmoment.tn</li>
+                <li>support@showfront.events</li>
                 <li>+216 71 000 000</li>
                 <li>Tunis, Tunisia</li>
               </ul>
@@ -706,7 +706,7 @@ export default function CategoryPage() {
           </div>
 
           <div className="border-t border-stone-800 mt-12 pt-8 text-center text-stone-500 text-sm">
-            <p>© 2026 Golden Moment Events. All rights reserved.</p>
+            <p>© 2026 Showfront Events. All rights reserved.</p>
           </div>
         </div>
       </footer>

@@ -4,14 +4,14 @@ The frontend stays on its current Vercel project. Create a second Vercel project
 
 ## Backend project
 
-1. Import `ChamseddineChenn/Golden_Moment` and set the root directory to `ticketing-backend`.
+1. Import `ChamseddineChenn/Showfront` and set the root directory to `ticketing-backend`.
 2. Framework preset: Other. Build command: `npm run build`. Output is not a static site; `vercel.json` routes every path to `api/index.js`.
 3. Copy the keys from `.env.example` into the Vercel environment. Use placeholders only in git. Set at least:
    - `MONGODB_URI`
    - `JWT_ACCESS_SECRET` and `JWT_REFRESH_SECRET` (long random strings; the API refuses to start without them)
    - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (test keys)
    - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
-   - `FRONTEND_URL=https://golden-moment-inky.vercel.app`
+   - `FRONTEND_URL=https://showfront-web.vercel.app`
    - `NODE_ENV=production`
    - `SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL`, `SENDGRID_FROM_NAME` for signup, password reset, and ticket receipts. `SENDGRID_BASE_URL` defaults to `https://app.mailroomly.com/`. The from address must be verified at that host.
    - Mail (`SMTP_*` or `MAIL_*`) only if the older SMTP path should also run, and OAuth values if those logins should work

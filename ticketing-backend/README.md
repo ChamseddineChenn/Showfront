@@ -1,6 +1,6 @@
-# Golden Moment API
+# Showfront API
 
-The backend for **Golden Moment**, an online event-ticketing platform. It provides the application API for event discovery, accounts and authentication, ticket purchasing, payment processing, ticket delivery, and administrative workflows.
+The backend for **Showfront**, an online event-ticketing platform. It provides the application API for event discovery, accounts and authentication, ticket purchasing, payment processing, ticket delivery, and administrative workflows.
 
 Built with **NestJS 11, TypeScript, MongoDB/Mongoose, and Stripe**.
 

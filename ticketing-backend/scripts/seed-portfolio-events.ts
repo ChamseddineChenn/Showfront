@@ -150,8 +150,8 @@ function buildEvent(
 
   return {
     name: title,
-    description: `${category} evening presented by Golden Moment.`,
-    longDescription: `${title} is a published portfolio event used to show how Golden Moment lists dates, ticket types, and seating across a full season.`,
+    description: `${category} evening presented by Showfront.`,
+    longDescription: `${title} is a published portfolio event used to show how Showfront lists dates, ticket types, and seating across a full season.`,
     coverImage: catalog.image,
     date,
     venue: catalog.venue,

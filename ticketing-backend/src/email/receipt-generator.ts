@@ -1,6 +1,6 @@
 /**
  * Generate professional HTML email template for ticket receipt
- * Design matches Golden Moment website (amber/stone color scheme)
+ * Design matches Showfront website (amber/stone color scheme)
  * PDF-optimized for attachment
  */
 export function generateReceiptHTML(
@@ -455,8 +455,8 @@ export function generateReceiptHTML(
             <!-- Footer -->
             <div class="footer">
               <p>Thank you for your purchase!</p>
-              <p>For support, contact <strong>support@goldenmoment.com</strong></p>
-              <p style="margin-top: 16px; color: #9ca3af;">© Golden Moment Events. All rights reserved.</p>
+              <p>For support, contact <strong>support@showfront.events</strong></p>
+              <p style="margin-top: 16px; color: #9ca3af;">© Showfront Events. All rights reserved.</p>
             </div>
           </div>
         </div>

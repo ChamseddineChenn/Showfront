@@ -57,7 +57,7 @@ export class UploadService {
       const result = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           {
-            folder: 'golden_moment/events', // Organize uploads in folder
+            folder: 'showfront/events', // Organize uploads in folder
             resource_type: 'auto',
           },
           (error, result) => {

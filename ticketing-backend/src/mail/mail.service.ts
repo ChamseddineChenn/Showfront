@@ -88,7 +88,7 @@ export class MailService {
     const mailOptions = {
       from: this.configService.get<string>('mail.from'),
       to: email,
-      subject: '✨ Verify Your Golden Moment Account',
+      subject: '✨ Verify Your Showfront Account',
       html: `
         <!DOCTYPE html>
         <html>
@@ -106,7 +106,7 @@ export class MailService {
         <body>
           <div class="container">
             <div class="header">
-              <h1>🎉 Welcome to Golden Moment!</h1>
+              <h1>🎉 Welcome to Showfront!</h1>
             </div>
             <div class="content">
               <p>Hi there,</p>
@@ -118,10 +118,10 @@ export class MailService {
               <p>Or copy and paste this link into your browser:</p>
               <p style="word-break: break-all; color: #f59e0b;">${verificationUrl}</p>
               <p><strong>This link will expire in 24 hours.</strong></p>
-              <p>If you didn't create an account with Golden Moment, please ignore this email.</p>
+              <p>If you didn't create an account with Showfront, please ignore this email.</p>
             </div>
             <div class="footer">
-              <p>Golden Moment Events © 2026</p>
+              <p>Showfront Events © 2026</p>
               <p>Tunis, Tunisia</p>
             </div>
           </div>
@@ -148,7 +148,7 @@ export class MailService {
     const mailOptions = {
       from: this.configService.get<string>('mail.from'),
       to: email,
-      subject: '🔒 Reset Your Golden Moment Password',
+      subject: '🔒 Reset Your Showfront Password',
       html: `
         <!DOCTYPE html>
         <html>
@@ -170,7 +170,7 @@ export class MailService {
             </div>
             <div class="content">
               <p>Hi there,</p>
-              <p>We received a request to reset your password for your Golden Moment account.</p>
+              <p>We received a request to reset your password for your Showfront account.</p>
               <p>Click the button below to reset your password:</p>
               <div style="text-align: center;">
                 <a href="${resetUrl}" class="button">Reset Password</a>
@@ -183,7 +183,7 @@ export class MailService {
               </div>
             </div>
             <div class="footer">
-              <p>Golden Moment Events © 2026</p>
+              <p>Showfront Events © 2026</p>
               <p>Tunis, Tunisia</p>
             </div>
           </div>
@@ -228,10 +228,10 @@ export class MailService {
             <div class="content">
               <p>Hi there,</p>
               <p>Your password has been successfully reset. You can now log in with your new password.</p>
-              <p>If you didn't make this change, please contact our support team immediately at <strong>support@goldenmoment.tn</strong></p>
+              <p>If you didn't make this change, please contact our support team immediately at <strong>support@showfront.events</strong></p>
             </div>
             <div class="footer">
-              <p>Golden Moment Events © 2026</p>
+              <p>Showfront Events © 2026</p>
               <p>Tunis, Tunisia</p>
             </div>
           </div>
@@ -285,7 +285,7 @@ export class MailService {
             </div>
             <div class="content">
               <p>Hi there,</p>
-              <p>You recently updated your email address for your Golden Moment account.</p>
+              <p>You recently updated your email address for your Showfront account.</p>
               <div class="info-box">
                 <strong>📧 New Email:</strong> ${email}
               </div>
@@ -296,10 +296,10 @@ export class MailService {
               <p>Or copy and paste this link into your browser:</p>
               <p style="word-break: break-all; color: #f59e0b;">${verificationUrl}</p>
               <p><strong>This link will expire in 24 hours.</strong></p>
-              <p>If you didn't make this change, please contact our support team immediately at <strong>support@goldenmoment.tn</strong></p>
+              <p>If you didn't make this change, please contact our support team immediately at <strong>support@showfront.events</strong></p>
             </div>
             <div class="footer">
-              <p>Golden Moment Events © 2026</p>
+              <p>Showfront Events © 2026</p>
               <p>Tunis, Tunisia</p>
             </div>
           </div>

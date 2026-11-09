@@ -151,7 +151,7 @@ export default function ReceiptPage() {
 
       pdf.setFontSize(18);
       pdf.setTextColor(255, 255, 255);
-      pdf.text('Golden Moment Events', 42, 22);
+      pdf.text('Showfront Events', 42, 22);
 
       pdf.setFontSize(10);
       pdf.setTextColor(168, 162, 158);
@@ -390,7 +390,7 @@ export default function ReceiptPage() {
       pdf.setFontSize(8);
       pdf.setTextColor(168, 162, 158);
       pdf.text(
-        'Golden Moment Events • www.goldenmoment.tn • support@goldenmoment.tn',
+        'Showfront Events • www.showfront.events • support@showfront.events',
         pageWidth / 2,
         290.5,
         { align: 'center' },
@@ -516,9 +516,9 @@ export default function ReceiptPage() {
                 className="flex items-center gap-3 hover:opacity-80 transition"
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg flex items-center justify-center shadow-lg shadow-amber-500/20">
-                  <span className="text-white font-bold text-lg">G</span>
+                  <span className="text-white font-bold text-lg">S</span>
                 </div>
-                <span className="font-bold text-stone-900">Golden Moment</span>
+                <span className="font-bold text-stone-900">Showfront</span>
               </Link>
               <h1 className="text-xl font-bold text-stone-900">
                 Payment Receipt
@@ -777,7 +777,7 @@ export default function ReceiptPage() {
                     clipRule="evenodd"
                   />
                 </svg>
-                <span>Contact support@goldenmoment.tn for help</span>
+                <span>Contact support@showfront.events for help</span>
               </li>
             </ul>
           </div>
@@ -787,7 +787,7 @@ export default function ReceiptPage() {
         <footer className="bg-stone-900 text-white mt-12">
           <div className="max-w-5xl mx-auto px-6 py-8 text-center">
             <p className="text-stone-400 text-sm">
-              © 2026 Golden Moment Events. All rights reserved.
+              © 2026 Showfront Events. All rights reserved.
             </p>
           </div>
         </footer>
@@ -847,11 +847,11 @@ export default function ReceiptPage() {
               className="flex items-center gap-3 hover:opacity-80 transition"
             >
               <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg flex items-center justify-center shadow-lg shadow-amber-500/20">
-                <span className="text-white text-lg font-bold">G</span>
+                <span className="text-white text-lg font-bold">S</span>
               </div>
               <div>
                 <h1 className="text-lg font-bold text-stone-900">
-                  Golden Moment
+                  Showfront
                 </h1>
                 <p className="text-xs text-stone-500 -mt-0.5">
                   Events & Experiences
@@ -979,10 +979,10 @@ export default function ReceiptPage() {
             <div className="relative z-10 flex items-start justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30">
-                  <span className="text-xl font-bold text-stone-900">G</span>
+                  <span className="text-xl font-bold text-stone-900">S</span>
                 </div>
                 <div>
-                  <p className="font-bold text-lg">Golden Moment Events</p>
+                  <p className="font-bold text-lg">Showfront Events</p>
                   <p className="text-stone-300 text-sm">Premium E-Ticket</p>
                 </div>
               </div>
@@ -1162,8 +1162,8 @@ export default function ReceiptPage() {
           {/* Bottom Branding */}
           <div className="bg-stone-900 text-center py-6 border-t border-stone-800">
             <p className="text-stone-400 text-sm">
-              Golden Moment Events • www.goldenmoment.tn •
-              support@goldenmoment.tn
+              Showfront Events • www.showfront.events •
+              support@showfront.events
             </p>
           </div>
         </div>
@@ -1245,7 +1245,7 @@ export default function ReceiptPage() {
                   clipRule="evenodd"
                 />
               </svg>
-              <span>Contact support@goldenmoment.tn for assistance</span>
+              <span>Contact support@showfront.events for assistance</span>
             </li>
           </ul>
         </div>
@@ -1255,7 +1255,7 @@ export default function ReceiptPage() {
       <footer className="bg-stone-900 text-white mt-12">
         <div className="max-w-5xl mx-auto px-6 py-8 text-center">
           <p className="text-stone-400 text-sm">
-            © 2026 Golden Moment Events. All rights reserved.
+            © 2026 Showfront Events. All rights reserved.
           </p>
         </div>
       </footer>

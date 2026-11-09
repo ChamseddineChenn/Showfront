@@ -568,9 +568,9 @@ export default function EventDetailPage() {
 
             <Link href="/" className="flex items-center gap-2">
               <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg flex items-center justify-center">
-                <span className="text-white text-sm font-bold">G</span>
+                <span className="text-white text-sm font-bold">S</span>
               </div>
-              <span className="font-bold text-stone-900">Golden Moment</span>
+              <span className="font-bold text-stone-900">Showfront</span>
             </Link>
           </div>
         </div>
@@ -1343,7 +1343,7 @@ export default function EventDetailPage() {
       <footer className="bg-stone-900 text-white mt-12">
         <div className="max-w-7xl mx-auto px-6 py-8 text-center">
           <p className="text-stone-400 text-sm">
-            © 2026 Golden Moment Events. All rights reserved.
+            © 2026 Showfront Events. All rights reserved.
           </p>
         </div>
       </footer>

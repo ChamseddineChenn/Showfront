@@ -361,7 +361,7 @@ function CheckoutSuccessContent() {
                 <p className="text-sm text-stone-600">
                   Need help?{' '}
                   <span className="font-semibold">
-                    Contact support@goldenmoment.tn
+                    Contact support@showfront.events
                   </span>
                 </p>
               </div>

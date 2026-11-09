@@ -99,11 +99,11 @@ export function SignupForm() {
             <div className="flex justify-between items-center h-16 sm:h-20">
               <Link href="/" className="flex items-center gap-2 sm:gap-3">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20">
-                  <span className="text-white text-base sm:text-lg font-bold">G</span>
+                  <span className="text-white text-base sm:text-lg font-bold">S</span>
                 </div>
                 <div>
                   <h1 className="text-base sm:text-xl font-bold text-stone-900 tracking-tight">
-                    Golden Moment
+                    Showfront
                   </h1>
                   <p className="text-xs text-stone-500 -mt-0.5 hidden sm:block">
                     Events & Experiences
@@ -139,11 +139,11 @@ export function SignupForm() {
             <div className="flex justify-between items-center h-16 sm:h-20">
               <Link href="/" className="flex items-center gap-2 sm:gap-3">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20">
-                  <span className="text-white text-base sm:text-lg font-bold">G</span>
+                  <span className="text-white text-base sm:text-lg font-bold">S</span>
                 </div>
                 <div>
                   <h1 className="text-base sm:text-xl font-bold text-stone-900 tracking-tight">
-                    Golden Moment
+                    Showfront
                   </h1>
                   <p className="text-xs text-stone-500 -mt-0.5 hidden sm:block">
                     Events & Experiences
@@ -176,11 +176,11 @@ export function SignupForm() {
           <div className="flex justify-between items-center h-16 sm:h-20">
             <Link href="/" className="flex items-center gap-2 sm:gap-3">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20">
-                <span className="text-white text-base sm:text-lg font-bold">G</span>
+                <span className="text-white text-base sm:text-lg font-bold">S</span>
               </div>
               <div>
                 <h1 className="text-base sm:text-xl font-bold text-stone-900 tracking-tight">
-                  Golden Moment
+                  Showfront
                 </h1>
                 <p className="text-xs text-stone-500 -mt-0.5 hidden sm:block">
                   Events & Experiences

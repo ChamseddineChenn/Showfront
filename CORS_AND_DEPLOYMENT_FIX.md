@@ -2,14 +2,14 @@
 
 ## Problem Summary
 
-The deployed frontend at `https://golden-moment-inky.vercel.app` was unable to call the QR validation endpoint due to two CORS issues:
+The deployed frontend at `https://showfront-web.vercel.app` was unable to call the QR validation endpoint due to two CORS issues:
 
 1. **Frontend Issue**: The frontend was hardcoding `http://localhost:3002` instead of using the deployed backend URL
 2. **Backend Issue**: The backend CORS was only allowing `http://localhost:3000` and didn't include the Vercel domain
 
 **Error Message:**
 ```
-Access to fetch at 'http://localhost:3002/tickets/validate-qr' from origin 'https://golden-moment-inky.vercel.app' 
+Access to fetch at 'http://localhost:3002/tickets/validate-qr' from origin 'https://showfront-web.vercel.app' 
 has been blocked by CORS policy: Response to preflight request doesn't pass access control check: 
 The 'Access-Control-Allow-Origin' header has a value 'http://localhost:3000' that is not equal to the supplied origin.
 ```
@@ -29,7 +29,7 @@ The 'Access-Control-Allow-Origin' header has a value 'http://localhost:3000' tha
 const allowedOrigins = [
   'http://localhost:3000',              // Local development
   'http://localhost:3001',              // Alternative local dev
-  'https://golden-moment-inky.vercel.app', // Production frontend
+  'https://showfront-web.vercel.app', // Production frontend
 ];
 
 // Add any additional origins from environment variable
@@ -130,7 +130,7 @@ FRONTEND_URL=http://localhost:3000
 #### Backend Environment Variables
 ```bash
 # .env file for ticketing-backend
-FRONTEND_URL=https://golden-moment-inky.vercel.app
+FRONTEND_URL=https://showfront-web.vercel.app
 # OR
 FRONTEND_URL=https://your-frontend-domain.com
 ```
@@ -152,7 +152,7 @@ NEXT_PUBLIC_BACKEND_URL=https://your-backend-url.com
 
 **Step 2:** Set environment variables in your deployment platform:
 ```
-FRONTEND_URL=https://golden-moment-inky.vercel.app
+FRONTEND_URL=https://showfront-web.vercel.app
 ```
 
 **Step 3:** Redeploy the backend
@@ -171,7 +171,7 @@ NEXT_PUBLIC_BACKEND_URL=https://your-backend-url.com
 ### 3. Verify the Fix
 
 **Test QR Code Validation:**
-1. Navigate to `https://golden-moment-inky.vercel.app/admin`
+1. Navigate to `https://showfront-web.vercel.app/admin`
 2. Open QR Scanner
 3. Scan a valid QR code
 4. Verify **no CORS errors** appear in browser console
@@ -194,7 +194,7 @@ Backend CORS only allows http://localhost:3000
 Frontend (Vercel) → calls getAPIBaseURL() → https://deployed-backend.com
 ↓
 Backend CORS whitelist:
-  ✓ https://golden-moment-inky.vercel.app (new)
+  ✓ https://showfront-web.vercel.app (new)
   ✓ http://localhost:3000 (dev)
   ✓ http://localhost:3001 (dev)
   ✓ Any FRONTEND_URL env var (flexible)
@@ -222,7 +222,7 @@ Success! API responds with proper CORS headers
 3. **Verify Backend Redeployed**
    - Check deployment timestamp
    - Confirm new code with CORS changes is live
-   - Test with curl: `curl -H "Origin: https://golden-moment-inky.vercel.app" http://your-backend/tickets/validate-qr -v`
+   - Test with curl: `curl -H "Origin: https://showfront-web.vercel.app" http://your-backend/tickets/validate-qr -v`
 
 4. **Clear Browser Cache**
    - Hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
@@ -237,7 +237,7 @@ If your backend is deployed to a different domain than `your-backend-url.com`:
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
-  'https://golden-moment-inky.vercel.app',
+  'https://showfront-web.vercel.app',
   'https://your-actual-backend-domain.com', // Add here
 ];
 ```

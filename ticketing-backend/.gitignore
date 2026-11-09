@@ -46,3 +46,4 @@ coverage/
 .cache/
 *.tgz
 .turbo/
+backend.log

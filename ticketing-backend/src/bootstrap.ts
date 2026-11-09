@@ -41,7 +41,7 @@ export async function configureApp(app: INestApplication): Promise<void> {
   const allowedOrigins = new Set<string>([
     'http://localhost:3000',
     'http://localhost:3001',
-    'https://golden-moment-inky.vercel.app',
+    'https://showfront-web.vercel.app',
   ]);
 
   const extraOrigins = [

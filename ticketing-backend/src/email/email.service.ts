@@ -25,7 +25,7 @@ export class EmailService {
     const smtpPass = process.env.SMTP_PASS || process.env.MAIL_PASSWORD;
     const fromEmail =
       process.env.SMTP_FROM_EMAIL || process.env.MAIL_FROM || smtpUser;
-    const fromName = process.env.SMTP_FROM_NAME || 'Golden Moment';
+    const fromName = process.env.SMTP_FROM_NAME || 'Showfront';
 
     this.logger.log('Initializing email transporter', EmailService.name, {
       smtpHost,
@@ -199,7 +199,7 @@ export class EmailService {
         process.env.SMTP_USER ||
         process.env.MAIL_USER ||
         process.env.MAIL_FROM;
-      const fromName = process.env.SMTP_FROM_NAME || 'Golden Moment';
+      const fromName = process.env.SMTP_FROM_NAME || 'Showfront';
 
       const mailOptions = {
         from: `${fromName} <${fromEmail}>`,

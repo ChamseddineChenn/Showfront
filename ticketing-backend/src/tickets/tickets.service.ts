@@ -621,8 +621,8 @@ export class TicketsService {
               </p>
             </div>
             <div class="footer">
-              <p>Golden Moment Events © 2026</p>
-              <p>For support, contact support@goldenmoment.tn</p>
+              <p>Showfront Events © 2026</p>
+              <p>For support, contact support@showfront.events</p>
             </div>
           </div>
         </body>

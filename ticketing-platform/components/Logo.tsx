@@ -22,8 +22,8 @@ export function Logo({ isAdmin = false }: LogoProps) {
   const logoContent = (
     <>
       <Image
-        src="/GoldenMoment_logo.png"
-        alt="Golden Moment Logo"
+        src="/Showfront_logo.png"
+        alt="Showfront Logo"
         width={160}
         height={160}
         className="w-12 h-12 sm:w-14 sm:h-14 object-contain flex-shrink-0"
@@ -31,7 +31,7 @@ export function Logo({ isAdmin = false }: LogoProps) {
       />
       <div>
         <h1 className="text-base sm:text-2xl font-bold text-stone-900 tracking-tight">
-          Golden Moment
+          Showfront
         </h1>
         <p className="text-xs sm:text-sm text-stone-500 -mt-0.5 hidden sm:block">
           Events & Experiences
