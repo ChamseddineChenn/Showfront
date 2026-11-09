@@ -11,6 +11,18 @@ import { Payment, PaymentDocument } from './payment.schema';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { TicketsService } from '../tickets/tickets.service';
 import { EventsService } from '../events/events.service';
+import { RequestUser } from '../auth/guards/user-type.guard';
+import { UserType } from '../users/enums/user-type.enum';
+import {
+  EarlyBirdSoldOutException,
+  InvalidTicketTypeException,
+  PastEventException,
+  SeatUnavailableException,
+} from '../common/exceptions/custom-exceptions';
+
+const MAX_SEATS_PER_PURCHASE = 10;
+
+type SeatSelection = { sectionId: string; seatId: string };
 
 @Injectable()
 export class PaymentsService {
@@ -51,24 +63,35 @@ export class PaymentsService {
 
       const {
         eventId,
-        ticketIds,
-        totalAmount,
         buyerEmail,
         buyerName,
         buyerPhoneNumber,
-        ticketType,
         successUrl,
         cancelUrl,
       } = dto;
+      const ticketType = dto.ticketType || 'Standard';
 
       // Validate input
-      if (!userId || !eventId || ticketIds.length === 0 || totalAmount <= 0) {
+      if (!userId || !eventId || !dto.ticketIds?.length) {
         throw new BadRequestException('Invalid checkout session parameters');
+      }
+
+      // dto.totalAmount is client-supplied and deliberately ignored
+      const { ticketIds, amountInCents } = await this.resolvePurchase(
+        eventId,
+        ticketType,
+        dto.ticketIds,
+      );
+
+      if (amountInCents <= 0) {
+        throw new BadRequestException(
+          'This purchase is free. Use /payments/create-free-ticket instead.',
+        );
       }
 
       // Create Stripe Payment Intent
       const paymentIntent = await this.stripe.paymentIntents.create({
-        amount: Math.round(totalAmount * 100), // Convert to cents
+        amount: amountInCents,
         currency: 'usd',
         metadata: {
           userId,
@@ -114,7 +137,7 @@ export class PaymentsService {
         userId: userIdValue,
         eventId: new Types.ObjectId(eventId),
         ticketIds: processedTicketIds,
-        amount: Math.round(totalAmount * 100), // Store in cents for consistency
+        amount: amountInCents,
         currency: 'usd',
         stripePaymentIntentId: paymentIntent.id,
         status: 'pending',
@@ -138,6 +161,7 @@ export class PaymentsService {
       return {
         clientSecret: paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id,
+        amount: amountInCents,
       };
     } catch (error) {
       this.logger.error('Error creating checkout session:', error);
@@ -333,7 +357,133 @@ export class PaymentsService {
     }
   }
 
-  async getPaymentById(paymentId: string) {
+  /**
+   * Validates a purchase request against the event stored in MongoDB and
+   * computes the authoritative amount. Mirrors the checks that
+   * TicketsService.createTicketsFromPayment applies when issuing tickets.
+   */
+  private async resolvePurchase(
+    eventId: string,
+    ticketType: string,
+    requestedTicketIds: any[],
+  ): Promise<{ event: any; ticketIds: any[]; amountInCents: number }> {
+    if (!Types.ObjectId.isValid(eventId)) {
+      throw new BadRequestException('Invalid eventId');
+    }
+
+    const event: any = await this.eventsService.findById(eventId);
+
+    if (new Date(event.date) < new Date()) {
+      throw new PastEventException();
+    }
+
+    if (!event.ticketTypes?.[ticketType]?.enabled) {
+      throw new InvalidTicketTypeException(ticketType);
+    }
+
+    if (ticketType === 'EarlyBird') {
+      const earlyBirdLimit = event.ticketTypes.EarlyBird.limit;
+      if (
+        earlyBirdLimit &&
+        earlyBirdLimit > 0 &&
+        event.earlyBirdCount >= earlyBirdLimit
+      ) {
+        throw new EarlyBirdSoldOutException();
+      }
+    }
+
+    const seats: SeatSelection[] = [];
+    let ticketIds: any[];
+
+    if (event.seatingLayout?.enabled) {
+      if (
+        requestedTicketIds.length === 0 ||
+        requestedTicketIds.length > MAX_SEATS_PER_PURCHASE
+      ) {
+        throw new BadRequestException(
+          `Select between 1 and ${MAX_SEATS_PER_PURCHASE} seats`,
+        );
+      }
+
+      const seen = new Set<string>();
+      for (const item of requestedTicketIds) {
+        if (
+          !item ||
+          typeof item !== 'object' ||
+          typeof item.sectionId !== 'string' ||
+          typeof item.seatId !== 'string'
+        ) {
+          throw new BadRequestException(
+            'Each ticket must be a seat with sectionId and seatId',
+          );
+        }
+
+        const key = `${item.sectionId}:${item.seatId}`;
+        if (seen.has(key)) {
+          throw new BadRequestException(
+            `Seat ${item.seatId} was selected more than once`,
+          );
+        }
+        seen.add(key);
+
+        const section = event.seatingLayout.sections?.find(
+          (s) => s.id === item.sectionId,
+        );
+        const seat = section?.seats?.find((s) => s.seatId === item.seatId);
+        if (!seat) {
+          throw new BadRequestException(
+            `Seat ${item.seatId} does not exist for this event`,
+          );
+        }
+        if (seat.status === 'unavailable') {
+          throw new SeatUnavailableException(
+            `Seat ${item.seatId} is already sold`,
+          );
+        }
+
+        seats.push({ sectionId: item.sectionId, seatId: item.seatId });
+      }
+      ticketIds = seats;
+    } else {
+      if (
+        requestedTicketIds.length !== 1 ||
+        requestedTicketIds[0] !== 'auto-assigned'
+      ) {
+        throw new BadRequestException(
+          "ticketIds must be ['auto-assigned'] for events without seating",
+        );
+      }
+      ticketIds = ['auto-assigned'];
+    }
+
+    const price = this.ticketsService.calculatePaymentTicketPrice(
+      event,
+      ticketType,
+      seats,
+    );
+
+    return { event, ticketIds, amountInCents: Math.round(price * 100) };
+  }
+
+  /**
+   * Returns the payment only if the user owns it or is an admin. Any other
+   * case gets the same 404 as a missing payment so existence isn't leaked.
+   */
+  private assertPaymentAccess(
+    payment: PaymentDocument | null,
+    user: RequestUser,
+  ): PaymentDocument {
+    const isOwner =
+      !!payment && !!user?.userId && payment.userId?.toString() === user.userId;
+    const isAdmin = user?.userType === UserType.ADMIN.toString();
+
+    if (!payment || !(isOwner || isAdmin)) {
+      throw new NotFoundException('Payment not found');
+    }
+    return payment;
+  }
+
+  async getPaymentById(paymentId: string, user: RequestUser) {
     // Validate paymentId is provided and looks like a valid ObjectId
     if (!paymentId || paymentId === 'undefined') {
       throw new BadRequestException('Invalid payment ID provided');
@@ -344,10 +494,13 @@ export class PaymentsService {
       if (Types.ObjectId.isValid(paymentId)) {
         const payment = await this.paymentModel.findById(paymentId);
         if (payment) {
-          return payment;
+          return this.assertPaymentAccess(payment, user);
         }
       }
     } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err;
+      }
       // Continue to next check if ObjectId parsing fails
     }
 
@@ -356,10 +509,7 @@ export class PaymentsService {
       stripePaymentIntentId: paymentId,
     });
 
-    if (!payment) {
-      throw new NotFoundException('Payment not found');
-    }
-    return payment;
+    return this.assertPaymentAccess(payment, user);
   }
 
   async getUserPayments(userId: string) {
@@ -374,14 +524,11 @@ export class PaymentsService {
     });
   }
 
-  async getPaymentByIntent(paymentIntentId: string) {
+  async getPaymentByIntent(paymentIntentId: string, user: RequestUser) {
     const payment = await this.paymentModel.findOne({
       stripePaymentIntentId: paymentIntentId,
     });
-    if (!payment) {
-      throw new NotFoundException('Payment not found');
-    }
-    return payment;
+    return this.assertPaymentAccess(payment, user);
   }
 
   async createFreeTicket(userId: string, dto: any) {
@@ -402,11 +549,18 @@ export class PaymentsService {
         throw new BadRequestException('Invalid free ticket parameters');
       }
 
-      // Get event to verify it exists and has a Free ticket type enabled
-      const event = await this.eventsService.findById(dto.eventId);
-      if (!event) {
-        throw new NotFoundException('Event not found');
+      const { event, ticketIds, amountInCents } = await this.resolvePurchase(
+        dto.eventId,
+        dto.ticketType,
+        dto.ticketIds,
+      );
+
+      if (amountInCents > 0) {
+        throw new BadRequestException(
+          `Ticket type "${dto.ticketType}" is not free for this event`,
+        );
       }
+      dto.ticketIds = ticketIds;
 
       this.logger.log('[PaymentsService] Event found:', {
         eventName: event.name,

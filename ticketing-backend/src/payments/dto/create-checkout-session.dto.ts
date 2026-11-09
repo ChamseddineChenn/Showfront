@@ -23,9 +23,11 @@ export class CreateCheckoutSessionDto {
   @Transform(({ obj }) => obj.ticketIds)
   ticketIds: any[];
 
+  // Accepted for backward compatibility only; the charged amount is always
+  // computed server-side from the event's stored prices.
+  @IsOptional()
   @IsNumber()
-  @IsNotEmpty()
-  totalAmount: number;
+  totalAmount?: number;
 
   @IsOptional()
   @IsString()

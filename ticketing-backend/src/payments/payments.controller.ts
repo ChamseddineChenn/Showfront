@@ -4,23 +4,23 @@ import {
   Get,
   Body,
   Param,
-  Request,
   RawBodyRequest,
   Req,
   BadRequestException,
   UsePipes,
 } from '@nestjs/common';
 import { Public } from '../auth/decorators/public.decorator';
+import { GetCurrentUser } from '../auth/decorators/get-current-user.decorator';
+import { RequestUser } from '../auth/guards/user-type.guard';
 import { PaymentsService } from './payments.service';
 
 @Controller('payments')
 export class PaymentsController {
   constructor(private paymentsService: PaymentsService) {}
 
-  @Public()
   @Post('create-checkout-session')
   async createCheckoutSession(
-    @Request() req,
+    @GetCurrentUser() user: RequestUser,
     @Req() request: any, // Get raw express request to access body before transformation
   ) {
     // Get the raw body directly from Express request - bypasses class-transformer whitelist
@@ -37,19 +37,13 @@ export class PaymentsController {
     ) {
       throw new BadRequestException('ticketIds array is required');
     }
-    // totalAmount can be 0 for free tickets, but must be a number
-    if (typeof rawBody?.totalAmount !== 'number') {
-      throw new BadRequestException('totalAmount must be a number');
-    }
-    if (rawBody.totalAmount < 0) {
-      throw new BadRequestException('totalAmount cannot be negative');
-    }
 
-    // Build DTO from raw body - preserving ticketIds exactly as received
+    // Build DTO from raw body - preserving ticketIds exactly as received.
+    // totalAmount is still accepted from older clients but never forwarded:
+    // the charged amount is computed server-side.
     const dto = {
       eventId: rawBody.eventId,
       ticketIds: rawBody.ticketIds, // Preserved without stripping!
-      totalAmount: rawBody.totalAmount,
       buyerEmail: rawBody.buyerEmail,
       buyerName: rawBody.buyerName,
       buyerPhoneNumber: rawBody.buyerPhoneNumber,
@@ -58,14 +52,14 @@ export class PaymentsController {
       cancelUrl: rawBody.cancelUrl,
     };
 
-    // For unauthenticated users, use a temporary ID based on email or generate one
-    const userId = req.user?.id || `guest-${Date.now()}`;
-    return this.paymentsService.createCheckoutSession(userId, dto as any);
+    return this.paymentsService.createCheckoutSession(user.userId, dto as any);
   }
 
-  @Public()
   @Post('create-free-ticket')
-  async createFreeTicket(@Request() req, @Req() request: any) {
+  async createFreeTicket(
+    @GetCurrentUser() user: RequestUser,
+    @Req() request: any,
+  ) {
     // Get raw body - free ticket creation bypasses Stripe
     const rawBody = request.body;
 
@@ -90,8 +84,7 @@ export class PaymentsController {
       ticketType: rawBody.ticketType || 'Free',
     };
 
-    const userId = req.user?.id || `guest-${Date.now()}`;
-    return this.paymentsService.createFreeTicket(userId, dto as any);
+    return this.paymentsService.createFreeTicket(user.userId, dto as any);
   }
 
   @Public()
@@ -162,21 +155,24 @@ export class PaymentsController {
     return { received: true };
   }
 
-  @Public()
   @Get('by-intent/:paymentIntentId')
-  async getPaymentByIntent(@Param('paymentIntentId') paymentIntentId: string) {
-    return this.paymentsService.getPaymentByIntent(paymentIntentId);
+  async getPaymentByIntent(
+    @Param('paymentIntentId') paymentIntentId: string,
+    @GetCurrentUser() user: RequestUser,
+  ) {
+    return this.paymentsService.getPaymentByIntent(paymentIntentId, user);
   }
 
-  @Public()
   @Get(':paymentId')
-  async getPayment(@Param('paymentId') paymentId: string) {
-    return this.paymentsService.getPaymentById(paymentId);
+  async getPayment(
+    @Param('paymentId') paymentId: string,
+    @GetCurrentUser() user: RequestUser,
+  ) {
+    return this.paymentsService.getPaymentById(paymentId, user);
   }
 
   @Get('user/payments')
-  async getUserPayments(@Request() req) {
-    const userId = req.user?.id;
+  async getUserPayments(@GetCurrentUser('userId') userId: string) {
     if (!userId) {
       throw new BadRequestException('User not authenticated');
     }

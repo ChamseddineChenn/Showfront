@@ -70,7 +70,7 @@ Use [.env.example](./.env.example) as the variable reference. Important settings
 | `STRIPE_WEBHOOK_SECRET` | Stripe webhook signature verification |
 | `CLOUDINARY_CLOUD_NAME` | Cloudinary account |
 | `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` | Server-side Cloudinary credentials |
-| `QR_ENCRYPTION_KEY` | QR payload encryption key |
+| `QR_ENCRYPTION_KEY` | Required. 64 hex characters (32-byte aes-256-gcm key); the API fails to start if missing or malformed. See `.env.example` for generation and migration |
 | `MAIL_*` / `SMTP_*` | Email delivery configuration |
 | `GOOGLE_CLIENT_ID` / `FACEBOOK_APP_ID` / `FACEBOOK_APP_SECRET` | OAuth configuration |
 
@@ -111,11 +111,10 @@ The Stripe keys and webhook configuration determine whether the deployed instanc
 This repository has security controls such as JWT guards, role checks, request validation, Helmet, CORS restrictions, throttling, hashed refresh tokens, and Stripe webhook signature verification. These controls do **not** by themselves establish production readiness. A source review on 2026-11-07 identified unresolved high-priority issues that should be fixed and tested before handling real customer payments:
 
 - Public signup accepts a `userType` field, and the user-creation service honours `ADMIN`. Public callers may therefore be able to create administrator accounts. Public signup must force the regular user role; administrator provisioning must be restricted to a trusted process.
-- Checkout currently uses the client-submitted `totalAmount` to create the Stripe PaymentIntent. The server must derive the amount from the event's authoritative ticket prices, requested ticket types, and validated seats.
-- Payment lookup routes (`GET /payments/:paymentId` and `GET /payments/by-intent/:paymentIntentId`) and ticket lookup routes (`GET /tickets/:id` and `GET /tickets/by-payment/:paymentId`) are public. Review the returned fields and enforce ownership or an appropriate scoped access token.
-- QR/ticket-number validation routes are public and perform the check-in mutation. Protect check-in with staff/organizer authorization and make redemption atomic so concurrent scans cannot both be accepted.
-- QR encryption currently falls back to a hard-coded default key when `QR_ENCRYPTION_KEY` is absent, and the supplied key is padded/truncated rather than validated as a 32-byte key. Require a correctly sized high-entropy secret and fail startup when missing.
+- QR/ticket-number validation routes are public and perform the check-in mutation. Redemption is now atomic (concurrent scans cannot both be accepted), but check-in should still be restricted to staff/organizer authorization.
 - Payment success handling marks a payment succeeded before ticket creation completes. A failure between those operations needs a recoverable state transition and reconciliation strategy; webhook idempotency should also be enforced at the database level.
+
+Resolved since the review: checkout amounts are computed server-side from stored event prices (client `totalAmount` is ignored); checkout and the payment/ticket lookup routes require login and enforce ownership (admins, and organizers for tickets, keep access); `QR_ENCRYPTION_KEY` has no fallback and is validated at startup.
 
 Treat these as audit findings from the inspected source, not as proof that a deployed instance has been exploited. Keep all secrets in environment variables, rotate anything ever exposed, and test fixes against the deployed configuration. Do not use real customer payments until the critical items above are resolved.
 

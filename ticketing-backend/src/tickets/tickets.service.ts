@@ -2,12 +2,17 @@ import {
   Injectable,
   ConflictException,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import * as QRCode from 'qrcode';
 import * as crypto from 'crypto';
 import { Ticket, TicketStatus } from './ticket.schema';
+import { loadQrEncryptionKey } from './qr-encryption-key';
+import { Payment, PaymentDocument } from '../payments/payment.schema';
+import { RequestUser } from '../auth/guards/user-type.guard';
+import { UserType } from '../users/enums/user-type.enum';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { EventsService } from '../events/events.service';
 import { SeatsService } from '../events/seats.service';
@@ -25,19 +30,20 @@ import {
 
 @Injectable()
 export class TicketsService {
-  private readonly encryptionKey =
-    process.env.QR_ENCRYPTION_KEY ||
-    'default-insecure-key-change-in-production';
+  private readonly encryptionKey: Buffer;
   private readonly algorithm = 'aes-256-gcm';
   private readonly logger = new AppLogger(TicketsService.name);
 
   constructor(
     @InjectModel(Ticket.name) private ticketModel: Model<Ticket>,
+    @InjectModel(Payment.name) private paymentModel: Model<PaymentDocument>,
     private readonly eventsService: EventsService,
     private readonly seatsService: SeatsService,
     private readonly sendGridService: SendGridService,
     private readonly logsService: LogsService,
-  ) {}
+  ) {
+    this.encryptionKey = loadQrEncryptionKey();
+  }
 
   // Generate a secure encrypted QR token
   private generateQrToken(): { token: string; encryptedToken: string } {
@@ -45,7 +51,7 @@ export class TicketsService {
     const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv(
       this.algorithm,
-      Buffer.from(this.encryptionKey.padEnd(32, '0').slice(0, 32)),
+      this.encryptionKey,
       iv,
     );
     let encrypted = cipher.update(token, 'utf8', 'hex');
@@ -70,7 +76,7 @@ export class TicketsService {
 
       const decipher = crypto.createDecipheriv(
         this.algorithm,
-        Buffer.from(this.encryptionKey.padEnd(32, '0').slice(0, 32)),
+        this.encryptionKey,
         iv,
       );
       decipher.setAuthTag(authTag);
@@ -446,6 +452,68 @@ export class TicketsService {
     return ticket;
   }
 
+  // Organizers and admins already see every ticket via the staff routes.
+  private isStaff(user: RequestUser): boolean {
+    return (
+      user?.userType === UserType.ADMIN.toString() ||
+      user?.userType === UserType.ORGANIZER.toString()
+    );
+  }
+
+  private async userOwnsPayment(
+    paymentId: Types.ObjectId | string | undefined,
+    user: RequestUser,
+  ): Promise<boolean> {
+    if (
+      !paymentId ||
+      !user?.userId ||
+      !Types.ObjectId.isValid(paymentId.toString()) ||
+      !Types.ObjectId.isValid(user.userId)
+    ) {
+      return false;
+    }
+    const owned = await this.paymentModel.exists({
+      _id: paymentId,
+      userId: user.userId,
+    });
+    return !!owned;
+  }
+
+  /**
+   * Returns the ticket only to the buyer (owner of its payment) or staff.
+   * Anyone else gets the same 404 as a missing ticket.
+   */
+  async findByIdForUser(ticketId: string, user: RequestUser): Promise<Ticket> {
+    if (!Types.ObjectId.isValid(ticketId)) {
+      throw new TicketNotFoundException(ticketId);
+    }
+
+    const ticket = await this.findById(ticketId);
+
+    if (
+      this.isStaff(user) ||
+      (await this.userOwnsPayment(ticket.paymentId, user))
+    ) {
+      return ticket;
+    }
+
+    throw new TicketNotFoundException(ticketId);
+  }
+
+  async findByPaymentIdForUser(
+    paymentId: string,
+    user: RequestUser,
+  ): Promise<Ticket[]> {
+    if (
+      !Types.ObjectId.isValid(paymentId) ||
+      !(this.isStaff(user) || (await this.userOwnsPayment(paymentId, user)))
+    ) {
+      throw new NotFoundException('Payment not found');
+    }
+
+    return this.findByPaymentId(paymentId);
+  }
+
   /**
    * Send receipt email asynchronously
    */
@@ -697,20 +765,43 @@ export class TicketsService {
       .exec();
   }
 
+  /**
+   * Flips a ticket from VALID to USED in a single conditional update, so two
+   * concurrent redemptions can never both succeed. Returns null if the ticket
+   * was not VALID at the moment of the update.
+   */
+  private async redeemTicketAtomically(
+    ticketId: Types.ObjectId | string,
+  ): Promise<Ticket | null> {
+    return this.ticketModel
+      .findOneAndUpdate(
+        { _id: ticketId, status: TicketStatus.VALID },
+        { $set: { status: TicketStatus.USED, usedAt: new Date() } },
+        { new: true },
+      )
+      .populate('eventId')
+      .exec();
+  }
+
   async markAsUsed(ticketId: string): Promise<Ticket | null> {
     this.logger.log('Marking ticket as used', TicketsService.name, {
       ticketId,
     });
-    return this.ticketModel
-      .findByIdAndUpdate(
-        ticketId,
-        {
-          status: TicketStatus.USED,
-          usedAt: new Date(),
-        },
-        { new: true },
-      )
-      .exec();
+
+    if (!Types.ObjectId.isValid(ticketId)) {
+      throw new TicketNotFoundException(ticketId);
+    }
+
+    const redeemed = await this.redeemTicketAtomically(ticketId);
+    if (redeemed) {
+      return redeemed;
+    }
+
+    const exists = await this.ticketModel.exists({ _id: ticketId });
+    if (!exists) {
+      throw new TicketNotFoundException(ticketId);
+    }
+    throw new ConflictException('Ticket has already been used or is not valid');
   }
 
   async validateByQRToken(encryptedToken: string): Promise<{
@@ -788,18 +879,19 @@ export class TicketsService {
       };
     }
 
-    // Mark as used
-    const updatedTicket = await this.ticketModel
-      .findByIdAndUpdate(
-        ticket._id,
-        {
-          status: TicketStatus.USED,
-          usedAt: new Date(),
-        },
-        { new: true },
-      )
-      .populate('eventId')
-      .exec();
+    // Mark as used (only succeeds if the ticket is still valid)
+    const updatedTicket = await this.redeemTicketAtomically(ticket._id);
+    if (!updatedTicket) {
+      this.logger.warn(
+        'Ticket redeemed concurrently by another request',
+        TicketsService.name,
+        { ticketId: ticket._id.toString() },
+      );
+      return {
+        success: false,
+        message: 'This ticket has already been used.',
+      };
+    }
 
     this.logger.log('Ticket validated successfully', TicketsService.name, {
       ticketId: ticket._id.toString(),
@@ -809,7 +901,7 @@ export class TicketsService {
     return {
       success: true,
       message: 'Ticket validated successfully! Entry granted.',
-      ticket: updatedTicket || ticket,
+      ticket: updatedTicket,
     };
   }
 
@@ -881,18 +973,19 @@ export class TicketsService {
       };
     }
 
-    // Mark as used
-    const updatedTicket = await this.ticketModel
-      .findByIdAndUpdate(
-        ticket._id,
-        {
-          status: TicketStatus.USED,
-          usedAt: new Date(),
-        },
-        { new: true },
-      )
-      .populate('eventId')
-      .exec();
+    // Mark as used (only succeeds if the ticket is still valid)
+    const updatedTicket = await this.redeemTicketAtomically(ticket._id);
+    if (!updatedTicket) {
+      this.logger.warn(
+        'Ticket redeemed concurrently by another request',
+        TicketsService.name,
+        { ticketId: ticket._id.toString() },
+      );
+      return {
+        success: false,
+        message: 'This ticket has already been used.',
+      };
+    }
 
     this.logger.log('Ticket validated successfully', TicketsService.name, {
       ticketId: ticket._id.toString(),
@@ -902,7 +995,7 @@ export class TicketsService {
     return {
       success: true,
       message: 'Ticket validated successfully! Entry granted.',
-      ticket: updatedTicket || ticket,
+      ticket: updatedTicket,
     };
   }
 
@@ -1103,6 +1196,37 @@ export class TicketsService {
   }
 
   /**
+   * Price of a ticket issued from a payment, in the event's currency units.
+   * Shared by checkout (to set the Stripe amount) and ticket creation so the
+   * amount charged always matches the ticket's stored totalPrice.
+   */
+  calculatePaymentTicketPrice(
+    event: any,
+    ticketType: string,
+    seats: { sectionId: string; seatId: string }[],
+  ): number {
+    const basePrice = event.ticketTypes?.[ticketType]?.price || 0;
+    let totalPrice = basePrice * (seats.length || 1);
+    if (seats.length > 0 && event.seatingLayout?.enabled) {
+      // Add seat price modifiers
+      const sectionPrices = new Map<string, number>();
+      for (const seat of seats) {
+        const section = event.seatingLayout.sections.find(
+          (s) => s.id === seat.sectionId,
+        );
+        if (section && !sectionPrices.has(seat.sectionId)) {
+          sectionPrices.set(seat.sectionId, section.priceModifier || 0);
+        }
+      }
+      // Add all section modifiers
+      for (const modifier of sectionPrices.values()) {
+        totalPrice += modifier;
+      }
+    }
+    return totalPrice;
+  }
+
+  /**
    * Create tickets ONLY after payment succeeds
    * Called by payment webhook after payment_intent.succeeded event
    * @param paymentId - Payment document ID
@@ -1272,7 +1396,6 @@ export class TicketsService {
       // Create tickets
       const createdTickets: Ticket[] = [];
       const expiresAt = new Date(eventDate.getTime() + 15 * 60 * 1000);
-      const basePrice = event.ticketTypes[ticketType]?.price || 0;
 
       // Filter seats for seating events (use different name to avoid duplicate)
       const seatsForTicket = ticketIds.filter(
@@ -1295,24 +1418,11 @@ export class TicketsService {
       const { token, encryptedToken } = this.generateQrToken();
       const qrCode = await QRCode.toDataURL(encryptedToken);
 
-      // Calculate total price for all seats
-      let totalPrice = basePrice * (seatsForTicket.length || 1);
-      if (seatsForTicket.length > 0 && event.seatingLayout?.enabled) {
-        // Add seat price modifiers
-        const sectionPrices = new Map<string, number>();
-        for (const seat of seatsForTicket) {
-          const section = event.seatingLayout.sections.find(
-            (s) => s.id === seat.sectionId,
-          );
-          if (section && !sectionPrices.has(seat.sectionId)) {
-            sectionPrices.set(seat.sectionId, section.priceModifier || 0);
-          }
-        }
-        // Add all section modifiers
-        for (const modifier of sectionPrices.values()) {
-          totalPrice += modifier;
-        }
-      }
+      const totalPrice = this.calculatePaymentTicketPrice(
+        event,
+        ticketType,
+        seatsForTicket,
+      );
 
       const ticketData = {
         eventId: new (require('mongoose').Types.ObjectId)(eventId),

@@ -8,7 +8,7 @@ import { Reflector } from '@nestjs/core';
 import { USER_TYPES_KEY } from '../decorators/user-types.decorator';
 import { UserType } from '../../users/enums/user-type.enum';
 
-interface RequestUser {
+export interface RequestUser {
   userId: string;
   email: string;
   userType: string;

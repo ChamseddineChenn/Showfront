@@ -11,6 +11,8 @@ import {
 import { TicketsService } from './tickets.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { Public } from '../auth/decorators/public.decorator';
+import { GetCurrentUser } from '../auth/decorators/get-current-user.decorator';
+import { RequestUser } from '../auth/guards/user-type.guard';
 import { UserTypes } from '../auth/decorators/user-types.decorator';
 import { UserType } from '../users/enums/user-type.enum';
 import { AppLogger } from '../common/utils/logger';
@@ -90,9 +92,11 @@ export class TicketsController {
     return this.ticketsService.search(query);
   }
 
-  @Public()
   @Get('by-payment/:paymentId')
-  async findByPaymentId(@Param('paymentId') paymentId: string) {
+  async findByPaymentId(
+    @Param('paymentId') paymentId: string,
+    @GetCurrentUser() user: RequestUser,
+  ) {
     this.logger.log(
       'GET /tickets/by-payment/:paymentId',
       TicketsController.name,
@@ -100,7 +104,7 @@ export class TicketsController {
         paymentId,
       },
     );
-    return this.ticketsService.findByPaymentId(paymentId);
+    return this.ticketsService.findByPaymentIdForUser(paymentId, user);
   }
 
   @Get('by-number/:ticketNumber')
@@ -125,11 +129,10 @@ export class TicketsController {
     return this.ticketsService.findByEventId(eventId);
   }
 
-  @Public()
   @Get(':id')
-  async findById(@Param('id') id: string) {
+  async findById(@Param('id') id: string, @GetCurrentUser() user: RequestUser) {
     this.logger.log('GET /tickets/:id', TicketsController.name, { id });
-    return this.ticketsService.findById(id);
+    return this.ticketsService.findByIdForUser(id, user);
   }
 
   @Get()
