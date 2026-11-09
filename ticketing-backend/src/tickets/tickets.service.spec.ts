@@ -103,10 +103,13 @@ describe('TicketsService', () => {
   beforeEach(() => {
     process.env.QR_ENCRYPTION_KEY = crypto.randomBytes(32).toString('hex');
 
+    // Payment ids are Mixed paths: stored as ObjectIds, never cast from strings
     paymentModel = {
       exists: jest.fn(async (filter: any) =>
-        filter._id.toString() === paymentId.toString() &&
-        filter.userId === ownerId
+        filter._id instanceof Types.ObjectId &&
+        filter._id.equals(paymentId) &&
+        filter.userId instanceof Types.ObjectId &&
+        filter.userId.equals(ownerId)
           ? { _id: paymentId }
           : null,
       ),
@@ -254,8 +257,8 @@ describe('TicketsService', () => {
         service.findByPaymentIdForUser(paymentId.toString(), owner),
       ).resolves.toHaveLength(1);
       expect(paymentModel.exists).toHaveBeenCalledWith({
-        _id: paymentId.toString(),
-        userId: ownerId,
+        _id: paymentId,
+        userId: new Types.ObjectId(ownerId),
       });
 
       await expect(

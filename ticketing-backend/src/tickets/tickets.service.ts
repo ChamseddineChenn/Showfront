@@ -472,9 +472,10 @@ export class TicketsService {
     ) {
       return false;
     }
+    // Payment.userId is a Mixed path, so query values are not cast to ObjectId
     const owned = await this.paymentModel.exists({
-      _id: paymentId,
-      userId: user.userId,
+      _id: new Types.ObjectId(paymentId.toString()),
+      userId: new Types.ObjectId(user.userId),
     });
     return !!owned;
   }
