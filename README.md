@@ -2,6 +2,9 @@
 
 **Showfront** is an online event-ticketing platform designed to let people discover events, choose ticket options, and book their place online. It combines a Next.js web application with a separately deployed NestJS API and a MongoDB data layer.
 
+**Live application:** https://showfront.vercel.app/  
+**Source code:** https://github.com/ChamseddineChenn/Showfront
+
 The project brings together event discovery, account management, ticket inventory, checkout, payment integration, digital ticket delivery, QR-based validation, and administrative tools.
 
 ## Project highlights
@@ -50,5 +53,4 @@ Payment confirmation, ticket ownership, seat availability, and QR validation mus
 
 ## Project status
 
-The application is deployed as separate frontend and backend services. Integrations such as payment processing, email delivery, and social login depend on the environment-specific configuration. Refer to the deployment guide for the current backend deployment procedure and health-check route.
-
+The web application is deployed at [showfront.vercel.app](https://showfront.vercel.app/), with the API hosted separately. Integrations such as payment processing, email delivery, and social login depend on environment-specific configuration. Refer to the deployment guide for the current backend deployment procedure and health-check route.
