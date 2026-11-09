@@ -5,6 +5,11 @@ import { eventsAPI, ticketsAPI, seatsAPI } from '@/lib/api';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import SeatMap from '@/components/SeatMap';
+import { useAuth } from '@/lib/hooks/useAuth';
+import {
+  savePendingPurchase,
+  takePendingPurchase,
+} from '@/lib/pendingPurchase';
 
 interface Event {
   _id: string;
@@ -52,6 +57,7 @@ export default function EventDetailPage() {
   const params = useParams();
   const router = useRouter();
   const eventId = params.id as string;
+  const { user, loading: authLoading } = useAuth();
 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
@@ -59,6 +65,8 @@ export default function EventDetailPage() {
   const [submitting, setSubmitting] = useState(false);
   const [selectedSeats, setSelectedSeats] = useState<SelectedSeat[]>([]);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [restoredSeats, setRestoredSeats] = useState<SelectedSeat[]>();
+  const [selectionRestored, setSelectionRestored] = useState(false);
 
   const [formData, setFormData] = useState({
     buyerName: '',
@@ -151,6 +159,33 @@ export default function EventDetailPage() {
     }
   }, [event]);
 
+  // Resume a purchase started before the buyer logged in or signed up.
+  // Declared after the ticket-type default effect so the restored type wins.
+  useEffect(() => {
+    if (!event || authLoading || !user) return;
+
+    const pending = takePendingPurchase(event._id);
+    if (!pending) return;
+
+    const isTypeAvailable = getAvailableTicketTypes().some(
+      (t) => t.type === pending.formData.selectedTicketType,
+    );
+
+    setFormData((prev) => ({
+      ...prev,
+      ...pending.formData,
+      selectedTicketType: isTypeAvailable
+        ? pending.formData.selectedTicketType
+        : prev.selectedTicketType,
+      buyerEmail: pending.formData.buyerEmail || user.email || '',
+    }));
+    // SeatMap keeps only the seats that are still available
+    if (pending.selectedSeats.length > 0) {
+      setRestoredSeats(pending.selectedSeats);
+    }
+    setSelectionRestored(true);
+  }, [event, authLoading, user]);
+
   // Recalculate total price when ticket type changes (for visual seating)
   useEffect(() => {
     if (selectedSeats.length > 0) {
@@ -189,6 +224,15 @@ export default function EventDetailPage() {
       if (selectedSeats.length > 10) {
         setError('Maximum 10 seats per purchase. Please select fewer seats.');
         setSubmitting(false);
+        return;
+      }
+
+      // Checkout requires an account: keep the selection, send the buyer to
+      // log in or sign up, and resume here afterwards. No seats are reserved.
+      if (!user) {
+        savePendingPurchase(event._id, { formData, selectedSeats });
+        const returnTo = `/event/${event._id}?resume=1`;
+        router.push(`/auth/login?redirect=${encodeURIComponent(returnTo)}`);
         return;
       }
 
@@ -750,6 +794,21 @@ export default function EventDetailPage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-12">
+        {selectionRestored && (
+          <div className="bg-amber-50 border border-amber-200 text-amber-800 px-6 py-4 rounded-xl mb-8 flex items-center justify-between gap-3">
+            <span>
+              Your selection was restored. Review it and click Complete
+              Purchase.
+            </span>
+            <button
+              type="button"
+              onClick={() => setSelectionRestored(false)}
+              className="text-amber-700 hover:text-amber-900 font-semibold text-sm"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl mb-8 flex items-center gap-3">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -874,6 +933,7 @@ export default function EventDetailPage() {
                       eventId={eventId}
                       selectedTicketType={formData.selectedTicketType}
                       ticketTypePrice={getTicketTypePrice()}
+                      initialSelectedSeats={restoredSeats}
                       onSeatsSelected={(seats, total) => {
                         setSelectedSeats(seats);
                         setTotalPrice(total);

@@ -2,11 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { SocialAuthButtons } from './SocialAuthButtons';
+import { isPurchaseRedirect, safeRedirectPath } from '@/lib/pendingPurchase';
 
 export function LoginForm() {
+  const redirectTo = safeRedirectPath(useSearchParams().get('redirect'));
+  const redirectQuery = redirectTo
+    ? `?redirect=${encodeURIComponent(redirectTo)}`
+    : '';
   const [mounted, setMounted] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +27,9 @@ export function LoginForm() {
   // Redirect if already logged in
   useEffect(() => {
     if (mounted && !authLoading && user) {
-      if (user.userType === 'Admin') {
+      if (redirectTo) {
+        router.push(redirectTo);
+      } else if (user.userType === 'Admin') {
         router.push('/admin/dashboard');
       } else if (user.userType === 'Organizer') {
         router.push('/');
@@ -30,7 +37,7 @@ export function LoginForm() {
         router.push('/');
       }
     }
-  }, [mounted, authLoading, user, router]);
+  }, [mounted, authLoading, user, router, redirectTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +45,7 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
-      await login(email, password);
+      await login(email, password, redirectTo ?? undefined);
     } catch (err: any) {
       setError(err.message || 'Login failed. Please try again.');
     } finally {
@@ -179,6 +186,11 @@ export function LoginForm() {
 
             {/* Form */}
             <div className="px-6 py-6 sm:px-8 sm:py-8">
+              {isPurchaseRedirect(redirectTo) && (
+                <div className="mb-6 p-3 sm:p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-sm">
+                  Log in or create an account to complete your purchase.
+                </div>
+              )}
               {error && (
                 <div className="mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-start gap-2 sm:gap-3">
                   <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -259,12 +271,16 @@ export function LoginForm() {
               </div>
 
               {/* Social Auth Buttons */}
-              <SocialAuthButtons mode="login" onError={(err) => setError(err)} />
+              <SocialAuthButtons
+                mode="login"
+                redirectTo={redirectTo ?? undefined}
+                onError={(err) => setError(err)}
+              />
 
               <div className="mt-6 sm:mt-8 pt-6 border-t border-stone-200 text-center space-y-2 sm:space-y-3">
                 <p className="text-stone-600 text-sm">
                   Don't have an account?{' '}
-                  <Link href="/auth/signup" className="text-amber-600 hover:text-amber-700 font-semibold transition">
+                  <Link href={`/auth/signup${redirectQuery}`} className="text-amber-600 hover:text-amber-700 font-semibold transition">
                     Create one now
                   </Link>
                 </p>

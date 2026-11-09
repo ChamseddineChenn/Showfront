@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { seatsAPI } from '@/lib/api';
 
 interface SeatObject {
@@ -41,6 +41,7 @@ interface SeatMapProps {
   eventId: string;
   selectedTicketType?: string;
   ticketTypePrice?: number;
+  initialSelectedSeats?: SelectedSeat[];
   onSeatsSelected?: (seats: SelectedSeat[], total: number) => void;
 }
 
@@ -48,12 +49,36 @@ export default function SeatMap({
   eventId,
   selectedTicketType,
   ticketTypePrice = 0,
+  initialSelectedSeats,
   onSeatsSelected,
 }: SeatMapProps) {
   const [seatMapData, setSeatMapData] = useState<SeatMapData | null>(null);
   const [selectedSeats, setSelectedSeats] = useState<SelectedSeat[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const appliedInitialSeats = useRef<SelectedSeat[] | undefined>(undefined);
+
+  // Apply a restored selection once, dropping seats that are no longer available
+  useEffect(() => {
+    if (
+      !seatMapData ||
+      !initialSelectedSeats?.length ||
+      appliedInitialSeats.current === initialSelectedSeats
+    ) {
+      return;
+    }
+    appliedInitialSeats.current = initialSelectedSeats;
+
+    const stillAvailable = initialSelectedSeats.filter((selected) =>
+      seatMapData.seatingLayout.sections
+        .find((section) => section.id === selected.sectionId)
+        ?.seats.some(
+          (seat) =>
+            seat.seatId === selected.seatId && seat.status === 'available',
+        ),
+    );
+    setSelectedSeats(stillAvailable.slice(0, 10));
+  }, [initialSelectedSeats, seatMapData]);
 
   useEffect(() => {
     loadSeatMap();

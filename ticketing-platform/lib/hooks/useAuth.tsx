@@ -38,71 +38,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (email: string, password: string) => {
+  // Go back to where the user came from, otherwise to their role's home
+  const redirectAfterAuth = (loggedInUser: User, redirectTo?: string) => {
+    if (redirectTo) {
+      router.push(redirectTo);
+    } else if (loggedInUser.userType === UserType.ADMIN) {
+      router.push('/admin/');
+    } else {
+      router.push('/');
+    }
+    router.refresh();
+  };
+
+  const login = async (
+    email: string,
+    password: string,
+    redirectTo?: string,
+  ) => {
     try {
       const response = await authApi.login(email, password);
       setUser(response.user);
-
-      // Redirect based on user type
-      if (response.user.userType === UserType.ADMIN) {
-        router.push('/admin/');
-      } else if (response.user.userType === UserType.ORGANIZER) {
-        router.push('/');
-      } else {
-        router.push('/');
-      }
-
-      router.refresh();
+      redirectAfterAuth(response.user, redirectTo);
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Login failed');
     }
   };
 
-  const loginWithGoogle = async (idToken: string) => {
+  const loginWithGoogle = async (idToken: string, redirectTo?: string) => {
     try {
       const response = await authApi.loginWithGoogle(idToken);
       setUser(response.user);
-
-      // Redirect based on user type
-      if (response.user.userType === UserType.ADMIN) {
-        router.push('/admin/');
-      } else if (response.user.userType === UserType.ORGANIZER) {
-        router.push('/');
-      } else {
-        router.push('/');
-      }
-
-      router.refresh();
+      redirectAfterAuth(response.user, redirectTo);
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Google login failed');
     }
   };
 
-  const loginWithFacebook = async (accessToken: string) => {
+  const loginWithFacebook = async (accessToken: string, redirectTo?: string) => {
     try {
       const response = await authApi.loginWithFacebook(accessToken);
       setUser(response.user);
-
-      // Redirect based on user type
-      if (response.user.userType === UserType.ADMIN) {
-        router.push('/admin/');
-      } else if (response.user.userType === UserType.ORGANIZER) {
-        router.push('/');
-      } else {
-        router.push('/');
-      }
-
-      router.refresh();
+      redirectAfterAuth(response.user, redirectTo);
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Facebook login failed');
     }
   };
 
-  const signup = async (email: string, password: string) => {
+  const signup = async (
+    email: string,
+    password: string,
+    redirectTo?: string,
+  ) => {
     try {
       const response = await authApi.signup(email, password);
       setUser(response.user);
-      router.push('/');
+      router.push(redirectTo || '/');
       router.refresh();
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Signup failed');

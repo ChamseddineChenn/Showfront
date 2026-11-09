@@ -41,13 +41,20 @@ export interface AuthResponse {
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  loginWithGoogle: (accessToken: string) => Promise<void>;
-  loginWithFacebook: (accessToken: string) => Promise<void>;
+  login: (
+    email: string,
+    password: string,
+    redirectTo?: string,
+  ) => Promise<void>;
+  loginWithGoogle: (accessToken: string, redirectTo?: string) => Promise<void>;
+  loginWithFacebook: (
+    accessToken: string,
+    redirectTo?: string,
+  ) => Promise<void>;
   signup: (
     email: string,
     password: string,
-    userType?: UserType,
+    redirectTo?: string,
   ) => Promise<void>;
   signupOrganizer: (data: OrganizerSignupData) => Promise<void>;
   logout: () => Promise<void>;
