@@ -2,6 +2,9 @@
 
 The backend for **Showfront**, an online event-ticketing platform. It provides the application API for event discovery, accounts and authentication, ticket purchasing, payment processing, ticket delivery, and administrative workflows.
 
+**Live application:** https://showfront.vercel.app/  
+**Source code:** https://github.com/ChamseddineChenn/Showfront
+
 Built with **NestJS 11, TypeScript, MongoDB/Mongoose, and Stripe**.
 
 ## Responsibilities
@@ -134,4 +137,3 @@ ticketing-backend/
 ├── DEPLOY_VERCEL.md     # Deployment guide
 └── package.json
 ```
-
