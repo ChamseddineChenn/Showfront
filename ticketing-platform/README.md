@@ -2,6 +2,9 @@
 
 The web frontend for **Showfront**, an online event-ticketing platform. It gives visitors a place to discover events, explore ticket options, select seats where supported, and complete a ticket-purchase flow. Account holders can manage their sessions and tickets, while authorized administrators manage platform content and operations.
 
+**Live application:** https://showfront.vercel.app/  
+**Source code:** https://github.com/ChamseddineChenn/Showfront
+
 Built with **Next.js 16, React 19, TypeScript, and Tailwind CSS 4**.
 
 ## Features
@@ -87,7 +90,7 @@ The backend repository directory contains its own setup and deployment documenta
 
 Authentication relies on the backend's session cookies. Keep credential handling on the server and avoid storing access or refresh tokens in browser local storage.
 
-Stripe's publishable key and the backend's Stripe secret/webhook settings must belong to the same Stripe environment. A deployment configured with test keys processes test payments only.
+Stripe's publishable key and the backend's Stripe secret and webhook settings must belong to the same Stripe environment. A deployment configured with test keys processes test payments only.
 
 ## Production build
 
@@ -98,4 +101,3 @@ Before deploying:
 3. Confirm the backend's CORS allowlist includes the exact frontend origin.
 4. Confirm Stripe keys and webhook settings use the intended test or live environment.
 5. Run `npm run build` and resolve build errors before release.
-
